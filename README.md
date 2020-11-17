@@ -12,13 +12,15 @@
 ## 具体步骤
 
 1. 添加机器人为好友,一般在 1-2 分钟后会自动通过
-2. 根据提示操作,可以发送#帮助#来获取具体指令,激活机器人
+2. 根据提示操作,可以发送`#帮助#`来获取具体指令,激活机器人
 3. 编写代码,连接机器人的 WebSocket Server 用于接收推送消息
-4. 编写 Http Client 的代码,用于请求机器人接口,让机器人发送消息给你  
-   这里有几个不同语言的简单 demo 可以参考
-    - [ChatBot-Go]()
-    - [ChatBot-NodeJS]()
-    - [ChatBot-PHP]()
+4. 编写 Http Client 的代码,用于请求机器人接口,让机器人发送消息给你
+
+## DEMO
+
+-   [ChatBot-Go](https://github.com/chatrbot/chatbot-go)
+-   [ChatBot-Node](https://github.com/chatrbot/chatbot-node)
+-   [ChatBot-PHP](https://github.com/chatrbot/chatbot-php)
 
 ## 功能
 
