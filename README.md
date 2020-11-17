@@ -22,7 +22,7 @@
 
 ## 示例截图
 
-![demo1](./images/demo1.png) ![demo2](./images/demo2.png)
+![demo](./images/demo.png)
 
 ## 联系方式
 
