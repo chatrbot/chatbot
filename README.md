@@ -18,7 +18,10 @@
 
 ## HTTP 接口
 
-> 域名为 demo 里的 server 地址
+> 服务器地址为 demo 里的 server 地址  
+> 所有接口都为 POST,参数为 json 格式放在 body 中,token 拼接在 url 上  
+> HEADER:Content-Type:application/json; charset=utf-8  
+> 例子: http://服务器地址/api/v1/chat/sendText?token=your_token
 
 #### 发送文本消息
 
