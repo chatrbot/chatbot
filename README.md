@@ -16,6 +16,34 @@
 3. 编写代码,连接机器人的 WebSocket Server 用于接收推送消息
 4. 编写 Http Client 的代码,用于请求机器人接口,让机器人发送消息给你
 
+## HTTP 接口
+
+> 域名为 demo 里的 server 地址
+
+#### 发送文本消息
+
+URI: /api/v1/chat/sendText  
+METHOD:`POST`  
+参数:  
+toUser string //接收人 username  
+content string //发送的文本内容
+
+#### 发送图片消息
+
+URI: /api/v1/chat/sendPic  
+METHOD:`POST`  
+参数:  
+toUser string //接收人 username  
+imgUrl string //图片的网络地址
+
+#### 发送表情/动图消息
+
+URI: /api/v1/chat/sendEmoji  
+METHOD:`POST`  
+参数:  
+toUser string //接收人 username  
+gifUrl string //图片的网络地址
+
 ## DEMO
 
 -   [ChatBot-Go](https://github.com/chatrbot/chatbot-go)
