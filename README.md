@@ -85,7 +85,7 @@
     //发生事件的群成员信息
     "members":[
         {
-            //群成员id
+            //群成员id
             "userName":"",
             //群成员昵称
             "nickName":"",
@@ -106,7 +106,8 @@
 
 -   [ChatBot-Go](https://github.com/chatrbot/chatbot-go)
 -   [ChatBot-Node](https://github.com/chatrbot/chatbot-node)
--   [ChatBot-PHP](https://github.com/chatrbot/chatbot-php)
+-   [ChatBot-PHP](https://github.com/chatrbot/chatbot-php)(暂未更新)  
+    维护精力有限,Python 版本应该要滞后一些.Java 需要大佬帮一把了,欢迎提交 Pr
 
 ## 功能
 
