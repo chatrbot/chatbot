@@ -14,6 +14,7 @@ METHOD:`POST`
 参数:  
 toUser string //接收人 username  
 content string //发送的文本内容
+atList []string //被@人的 username 数组,内容中也需要包含@昵称+空格+内容,例如@小明 你好
 
 #### 发送图片消息
 
