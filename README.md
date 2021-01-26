@@ -1,26 +1,182 @@
 # ChatBot 聊天机器人
 
-一个功能简单、稳定的聊天机器人.  
+一个可编程的微信机器人  
 你可以通过该机器人接入一些有趣的 API 来实现一些好玩的应用,例如快递查询、毒鸡汤、斗图等,也可以把自己人接入自己的服务中,作为告警、定时通知等服务.
 
-### ⚠️ 关于群内机器人注意事项 ⚠️
+## ⚠️ 关于群内机器人注意事项 ⚠️
 
-每个人只能将机器人拉入一个群,多的机器人会自动退群
+每个人只能将机器人拉入一个群,多的机器人会自动退群.如果需要增加上限可加入交流群联系我.
 
-## 接入流程
+## 目录
+
+-   [项目介绍](#项目介绍)
+-   [接入流程](#接入流程)
+-   [示例项目](#示例项目)
+-   [自定义开发](#自定义开发)
+-   [入群交流](#入群交流)
+
+## 项目介绍
+
+### Feature:
+
+-   个人
+    -   [x] 机器人接收文本、图片、表情、视频、音频消息
+    -   [ ] 接收和发送文件
+-   群聊
+    -   [x] 机器人接收文本、图片、表情、视频、音频消息
+    -   [x] 机器人被拉入群内事件
+    -   [x] 机器人被踢出群事件
+    -   [x] 群内成员新增事件
+    -   [x] 群内成员退出/被踢事件
+    -   [x] 机器人踢人接口
+
+类似 Server 酱,但是是通过个人微信实现.说通俗点其实是一个微信消息转发机器人,会把对应的消息转发到你的程序,并且提供了一定的发送接口能够让你命令机器人发送消息给你或者绑定的微信群.
+
+---
+
+主要流程图如下:
 
 ![流程图](./images/flow.png)
 
 > 图上蓝色部分都是你需要做的内容
 
-## 具体步骤
+主要流程:
 
-1. 添加机器人为好友,一般在 1-2 分钟后会自动通过
-2. 根据提示操作,可以发送`#帮助#`来获取具体指令,激活机器人
+1. 程序启动后建立一个 websocket 的连接,用于转发你发给机器人的消息和相关的群消息.([为什么使用 websocket 而不是 http](#为什么使用websocket))
+2. 项目提供了一系列的消息发送接口(例如常用的文本\图片\语音\视频等类型的消息),可以根据`1`中收到的消息做相应的逻辑处理.当然也可以直接使用相关接口发送消息,可以用于系统告警等,具体操作可以点击[这里](#如何直接发送消息给我自己)
+
+## 接入流程
+
+1. 添加机器人为好友(机器人二维码在底部),一般在 1-2 分钟后会自动通过
+2. 根据提示操作,可以发送`#帮助#`来获取具体指令,激活机器人,获取你自己的 token
 3. 编写代码,连接机器人的 WebSocket Server 用于接收推送消息
 4. 编写 Http Client 的代码,用于请求机器人接口,让机器人发送消息给你
 
-## 核心流程的数据结构
+## 示例项目
+
+-   [ChatBot-Go](https://github.com/chatrbot/chatbot-go)
+-   [ChatBot-Node](https://github.com/chatrbot/chatbot-node)
+-   [ChatBot-PHP](https://github.com/chatrbot/chatbot-php)(暂未更新)  
+    维护精力有限,Python 版本应该要滞后一些.Java 需要大佬帮一把了,欢迎提交 PR
+
+可以进入各个项目查看具体的 README 介绍,不要忘了在启动项目前获得一个属于你自己的 token([如何获取 token](#接入流程))
+
+## 自定义开发
+
+程序开发的主要逻辑其实就是上面提到的主要流程中的部分.  
+主要处理的就 2 个事情:
+
+1. 接收 websocket 的消息
+2. 调用 http 接口让机器人发送消息
+
+### 建立 websocket 连接
+
+这里拿 TypeScript 的伪代码举例:
+
+```typescript
+this.ws = new WebSocket( 'ws://' + this.host + '/ws?token=' + this.token)
+this.ws.on('open', () => {
+    console.log('连接websocket成功')
+    this.heartBeatTimer = setInterval(() => {
+        this.ws?.send('ping')
+    }, 10000)
+}
+```
+
+-   需要注意的是在连接建立之后需要发送一个 10s/次的心跳包,内容为字符串的"ping"即可,消息类型也为 Text.  
+    服务端会做心跳超时检测,阈值是 20s/次,也就是说至少 20s 内有一次心跳.
+-   如果自己用其他语言实现,例如 java 或者 python 记得做好断线重连(golang 和 ts 可以看[示例项目](#示例项目)中的例子),防止服务端更新重启导致的掉线.
+
+### websocket 消息处理
+
+目前机器人转发的消息类型主要分为两大类:
+
+-   普通的消息,例如文字\图片\视频等
+-   事件类型,主要是群内事件,例如群内有新成员加入,有人推群等.
+    -   [事件列表](#Feature)
+    -   [HTTP 接口](./HTTP.md)
+
+整个消息处理流程目前是以"插件"的思想来完成,一条消息可以经过多个插件来处理.  
+如果你是用`typescirpt`实现,可以查看相关[demo](https://github.com/chatrbot/chatbot-node/tree/main/src/plugins)中的例子,需要实现插件的抽象类,其实也就一个`do`方法:
+
+```typescript
+export abstract class Plugin {
+    protected bot: ChatBot
+    protected name: string
+
+    protected constructor(name: string, bot: ChatBot) {
+        this.name = name
+        this.bot = bot
+    }
+    abstract do(msg: PushMessage, rawData?: string): void
+}
+```
+
+其中的`PushMessage`就是程序会收到的消息,里面包含了具体的消息内容,发送人,接收人等信息,在我们调用发送接口的时候可能会用到.
+
+这里分别举个收发消息和处理事件的例子:  
+机器人在收到`@小明 踢`这样的消息时,会进行踢人操作,并且在群内发送一条消息告知操作结果.  
+这里`data.fromUser`就是`PushMessage`中这条消息/事件的发送人,其实也就是我们要发送消息的对象,原路返回的意思.如果是个人就是他的 wxId,如果是微信群则是群的 id.
+
+```typescript
+export class GroupPlugin extends Plugin {
+    constructor(bot: ChatBot) {
+        super("group", bot)
+    }
+
+    do(msg: PushMessage) {
+        //踢人操作要求机器人必须为群管理员
+        if (msg.msgType === PushMsgType.Message) {
+            const data = msg.data as UserMessage
+            const keyword = "踢"
+            /**
+             * 必须是文本消息
+             * 必须是群内消息
+             * 必须匹配到触发关键字
+             */
+            if (
+                data.msgType === MsgType.MsgTypeText &&
+                IsGroupMessage(data.fromUser) &&
+                SplitAtContent(data.groupContent) === keyword
+            ) {
+                if (IsGroupMember(data.groupMemberRole)) {
+                    this.bot
+                        .sendText(
+                            data.fromUser,
+                            "@" +
+                                data.groupMemberNickname +
+                                " 你不是管理员,休想命令我",
+                            [data.groupMember]
+                        )
+                        .catch((err) => {
+                            console.log(err)
+                        })
+                    return
+                }
+                this.bot
+                    .delGroupMembers(data.fromUser, data.atList)
+                    .then(() => {
+                        this.bot
+                            .sendText(
+                                data.fromUser,
+                                "@" + data.groupMemberNickname + " 搞定了老板",
+                                [data.groupMember]
+                            )
+                            .catch((err) => console.log(err))
+                    })
+            }
+            if (data.msgType === MsgType.MsgTypeText) {
+                this.bot.sendText(data.fromUser, "你好")
+            }
+        }
+    }
+}
+```
+
+完成插件后在主进程中调用即可,可以点击[这里](https://github.com/chatrbot/chatbot-node/blob/main/src/app.ts)查看例子.  
+整个链路涉及到的核心数据在下面注释,每个版本的 demo 中也基本注释详尽,还有问题可以加群交流.
+
+### 核心数据结构注释
 
 ```javascript
 //所有消息的包装
@@ -96,54 +252,9 @@
 }
 ```
 
-## HTTP 接口
-
-主要用于机器人主动发送消息给用户或者群
-
-[点击这里查看接口文档](./HTTP.md)
-
-## DEMO
-
--   [ChatBot-Go](https://github.com/chatrbot/chatbot-go)
--   [ChatBot-Node](https://github.com/chatrbot/chatbot-node)
--   [ChatBot-PHP](https://github.com/chatrbot/chatbot-php)(暂未更新)  
-    维护精力有限,Python 版本应该要滞后一些.Java 需要大佬帮一把了,欢迎提交 Pr
-
-## 功能
-
-### 个人
-
--   [x] 机器人接收文本、图片、表情、视频、音频消息
--   [ ] 接收和发送文件
-
-### 群聊
-
--   [x] 机器人接收文本、图片、表情、视频、音频消息
--   [x] 机器人被拉入群内事件
--   [x] 机器人被踢出群事件
--   [x] 群内成员新增事件
--   [x] 群内成员退出/被踢事件
--   [x] 机器人踢人
-
-### 机器人命令
-
--   [x] 查看机器人加入的群
--   [x] 命令机器人退群
-
-## 示例截图
-
-![demo](./images/demo.png)
-
-## FAQ
-
-Q:如何获取 Token?  
-A:加入技术交流群,添加群内机器人为好友,然后发送相关指令激活获取  
-Q:如何激活群内机器人?  
-A:把机器人拉入群内就算激活,每个人目前只能绑定一个群.而且同一个群内只能存在一个机器人,多了无效.  
-第一个拉机器人进群的用户会收到转发消息
-
 ## 联系方式
 
 1. 请先添加机器人为好友,等待 1-2 分钟后会自动通过
-2. 对机器人发送命令(记得带上#号): #交流群# 即可获取邀请链接  
-   ![qrcode](./images/qrcode.png)
+2. 对机器人发送命令(记得带上#号): #交流群# 即可获取邀请链接
+
+    ![qrcode](./images/qrcode.png)
