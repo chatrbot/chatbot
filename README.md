@@ -42,7 +42,8 @@
 
 主要流程:
 
-1. 程序启动后建立一个 websocket 的连接,用于转发你发给机器人的消息和相关的群消息.([为什么使用 websocket 而不是 http](#为什么使用websocket))
+1. 程序启动后建立一个 websocket 的连接,用于转发你发给机器人的消息和相关的群消息.
+    > 为什么使用 websocket 而不是 http 是因为如果是 http 回调的方式很多个人网络没有公网 ip,还需要内网穿透的方式来调试开发,过于繁琐.
 2. 项目提供了一系列的消息发送接口(例如常用的文本\图片\语音\视频等类型的消息),可以根据`1`中收到的消息做相应的逻辑处理.当然也可以直接使用相关接口发送消息,可以用于系统告警等,具体操作可以点击[这里](#如何直接发送消息给我自己)
 
 ## 接入流程
@@ -116,7 +117,7 @@ export abstract class Plugin {
 
 这里分别举个收发消息和处理事件的例子:  
 机器人在收到`@小明 踢`这样的消息时,会进行踢人操作,并且在群内发送一条消息告知操作结果.  
-这里`data.fromUser`就是`PushMessage`中这条消息/事件的发送人,其实也就是我们要发送消息的对象,原路返回的意思.如果是个人就是他的 wxId,如果是微信群则是群的 id.
+下面代码中`data.fromUser`就是`PushMessage`中这条消息/事件的发送人,其实也就是我们要发送消息的对象,原路返回的意思.如果是个人就是他的 wxId,如果是微信群则是群的 id.
 
 ```typescript
 export class GroupPlugin extends Plugin {
@@ -173,7 +174,7 @@ export class GroupPlugin extends Plugin {
 }
 ```
 
-完成插件后在主进程中调用即可,可以点击[这里](https://github.com/chatrbot/chatbot-node/blob/main/src/app.ts)查看例子.  
+完成插件内的逻辑后在主进程中调用即可,可以点击[这里](https://github.com/chatrbot/chatbot-node/blob/main/src/app.ts)查看调用例子.  
 整个链路涉及到的核心数据在下面注释,每个版本的 demo 中也基本注释详尽,还有问题可以加群交流.
 
 ### 核心数据结构注释
