@@ -12,27 +12,27 @@
 URI: /api/v1/chat/sendText  
 METHOD:`POST`  
 参数:  
-toUser string //接收人 username  
-content string //发送的文本内容
-atList []string //被@人的 username 数组,内容中也需要包含@昵称+空格+内容,例如@小明 你好
+toUser string // 接收人 username  
+content string // 发送的文本内容
+atList []string // 被@人的 username 数组,内容中也需要包含@昵称+空格+内容,例如@小明 你好
 
 ### 发送图片消息
 
 URI: /api/v1/chat/sendPic  
 METHOD:`POST`  
 参数:  
-toUser string //接收人 username  
-imgUrl string //图片的网络地址
+toUser string // 接收人 username  
+imgUrl string // 图片的网络地址
 
 ### 发送表情/动图消息
 
 URI: /api/v1/chat/sendEmoji  
 METHOD:`POST`  
 参数:  
-toUser string //接收人 username  
-gifUrl string 非必须 //图片的网络地址  
-emojiMd5 string 非必须 //接收到 xml 中的 md5 字段值  
-emojiTotalLen string 非必须 //接收到 xml 中的 len 字段值
+toUser string // 接收人 username  
+gifUrl string 非必须 // 图片的网络地址  
+emojiMd5 string 非必须 // 接收到 xml 中的 md5 字段值  
+emojiTotalLen string 非必须 // 接收到 xml 中的 len 字段值
 
 > 不建议直接使用 gifUrl 参数来直接发送动图 有一定几率失败  
 > 最好的方式还是通过接收到的表情消息 xml 中解析出 md5 和 len 来发送,这时候 gifUrl 可为空
@@ -86,8 +86,8 @@ newMsgId string // 消息 id
 
 ### 踢出群成员(机器人必须为管理员身份)
 
-URI: /api/v1/chatroom/delChatRoomMember
+URI: /api/v1/chatroom/delChatRoomMember  
 METHOD:`POST`  
 参数:  
-chatroom string // 相关群 id
+chatroom string // 相关群 id  
 memberList []string // 批量踢出的成员 id
