@@ -54,6 +54,27 @@ METHOD:`POST`
 toUser string // 接收人 username  
 silkUrl string // 音频文件地址,silk 格式
 
+### 发送小程序消息
+
+> 下面所有提到的参数可以在收到的小程序类型消息中获取到,整体是一个 xml 需要自行提取
+
+URI: /api/v1/chat/sendSmallApp  
+METHOD:`POST`  
+参数:  
+toUser string // 接收人 username  
+thumbUrl // 缩略图地址  
+title // 标题  
+des // 描述  
+url // 地址  
+sourceUserName // 来源用户名  
+sourceDisplayName // 来源显示名  
+username // 用户名  
+appid // 小程序 APPID  
+type // 类型  
+version // 版本  
+iconUrl // 图标地址  
+pagePath // 启动页
+
 ---
 
 ## 下载消息资源
